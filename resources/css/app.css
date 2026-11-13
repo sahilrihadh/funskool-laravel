@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Baloo 2', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+
+    /* Funskool brand palette — sampled from funskoolindia.com (logo red + site accent colors) */
+    --color-brand-50: #fef2f2;
+    --color-brand-100: #fde2e2;
+    --color-brand-200: #fbc5c5;
+    --color-brand-300: #f79191;
+    --color-brand-400: #f25c5c;
+    --color-brand-500: #ed1d24;
+    --color-brand-600: #d01920;
+    --color-brand-700: #a81318;
+    --color-brand-800: #7d0e12;
+    --color-brand-900: #55090c;
+
+    --color-sun-300: #fecb4d;
+    --color-sun-400: #f0c020;
+    --color-sun-500: #e8a61e;
+
+    --color-leaf-300: #d2ea7b;
+    --color-leaf-400: #c4e456;
+
+    --color-sky-tint-100: #f2fbff;
+    --color-sky-tint-300: #c7d9f9;
+    --color-sky-400: #66b4d9;
+    --color-sky-500: #4980ab;
+
+    --color-bubble-300: #ffb69f;
+    --color-bubble-400: #de90a9;
+
+    --color-ink-900: #231f20;
+    --color-cocoa-600: #5b3f3e;
+}

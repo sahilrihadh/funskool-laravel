@@ -1,0 +1,527 @@
+/*
+ * Admin theme — TailAdmin design system (https://tailadmin.com) on top of Filament.
+ *
+ * Layout (desktop): full-height sidebar with the logo on the left, header to its right
+ * (collapse button + ⌘K search on the left; theme toggle, notifications, user on the right).
+ * Tables follow TailAdmin "Data Table 3"; cards are rounded-2xl with a 1px gray-200 border.
+ * Colours come from App\Filament\Support\TailAdminPalette (brand #465FFF).
+ *
+ * Rebuild after editing:  npm run build   (or keep `npm run dev` running)
+ */
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../resources/views/vendor/filament-panels/**/*';
+
+@theme {
+    --text-theme-xs: 0.75rem;
+    --text-theme-xs--line-height: 1.125rem;
+    --text-theme-sm: 0.875rem;
+    --text-theme-sm--line-height: 1.25rem;
+    --text-title-sm: 1.875rem;
+    --text-title-sm--line-height: 2.375rem;
+    --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+    --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
+}
+
+:root {
+    --ta-header-h: 4.75rem;
+}
+
+/* ------------------------------------------------------------------ base */
+
+.fi-body {
+    @apply bg-gray-50 text-gray-800 dark:bg-gray-950 dark:text-white/90;
+}
+
+/* ------------------------------------------------------------------ sidebar */
+
+.fi-sidebar {
+    @apply bg-white dark:bg-gray-900;
+}
+
+@media (min-width: 64rem) {
+    /* Sidebar runs the full height with its own logo; the header sits to its right. */
+    .fi-body-has-topbar .fi-layout {
+        margin-top: calc(-1 * var(--ta-header-h));
+    }
+
+    .fi-body-has-topbar .fi-main-ctn {
+        padding-top: var(--ta-header-h);
+    }
+
+    .fi-body-has-topbar .fi-sidebar {
+        @apply top-0 z-40 h-dvh border-e border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900;
+    }
+
+    .fi-body-has-topbar .fi-sidebar-header {
+        @apply flex shadow-none ring-0 lg:flex dark:bg-gray-900;
+        height: var(--ta-header-h);
+        padding-inline: 1.75rem;
+    }
+
+    .fi-body:has(.fi-sidebar.fi-sidebar-open) .fi-topbar {
+        padding-inline-start: calc(var(--sidebar-width) + 1.5rem);
+    }
+
+    .fi-body:has(.fi-sidebar:not(.fi-sidebar-open)) .fi-topbar {
+        padding-inline-start: calc(var(--collapsed-sidebar-width) + 1.5rem);
+    }
+
+    .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-header {
+        @apply justify-center px-0;
+    }
+
+    .fi-sidebar:not(.fi-sidebar-open) .ta-brand-text,
+    .fi-sidebar:not(.fi-sidebar-open) .ta-sidebar-heading,
+    .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group::before {
+        @apply hidden;
+    }
+
+    .fi-topbar-start .fi-logo {
+        @apply hidden;
+    }
+}
+
+.fi-sidebar-nav {
+    @apply gap-y-0 px-5 pt-2 pb-8;
+}
+
+.fi-sidebar-nav-groups {
+    @apply mx-0 gap-y-1;
+}
+
+.ta-sidebar-heading,
+.fi-sidebar-group[data-group-label='Support']::before,
+.fi-sidebar-group[data-group-label='Integrations']::before {
+    @apply mb-3 block px-3 text-xs leading-5 font-normal tracking-wide text-gray-400 uppercase;
+}
+
+.fi-sidebar-group[data-group-label='Support']::before {
+    content: 'Support';
+    @apply mt-5;
+}
+
+.fi-sidebar-group[data-group-label='Integrations']::before {
+    content: 'Others';
+    @apply mt-5;
+}
+
+/* Parent items (navigation groups with an icon) — TailAdmin .menu-item */
+.fi-sidebar-group-btn {
+    @apply relative gap-x-3 rounded-lg px-3 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-white/5;
+
+    & .fi-icon {
+        @apply size-6 text-gray-500 dark:text-gray-400;
+    }
+}
+
+.fi-sidebar-group-label {
+    @apply text-sm leading-6 font-medium text-gray-700 dark:text-gray-300;
+}
+
+.fi-sidebar-group.fi-active > .fi-sidebar-group-btn {
+    @apply bg-primary-50 dark:bg-primary-500/12;
+
+    & .fi-icon,
+    & .fi-sidebar-group-label {
+        @apply text-primary-500 dark:text-primary-400;
+    }
+}
+
+.fi-sidebar-group-collapse-btn {
+    @apply text-gray-500 dark:text-gray-400;
+}
+
+.fi-sidebar-group-dropdown-trigger-btn {
+    @apply rounded-lg px-3 py-2;
+
+    & .fi-icon {
+        @apply size-6 text-gray-500;
+    }
+}
+
+.fi-sidebar-group.fi-active .fi-sidebar-group-dropdown-trigger-btn {
+    @apply bg-primary-50 dark:bg-primary-500/12;
+
+    & .fi-icon {
+        @apply text-primary-500 dark:text-primary-400;
+    }
+}
+
+/* Sub-menu items — TailAdmin .menu-dropdown-item */
+.fi-sidebar-group-items {
+    @apply mt-1 ms-9 gap-y-1;
+}
+
+.fi-sidebar-group:not([data-group-label]) > .fi-sidebar-group-items,
+.fi-sidebar-group[data-group-label=''] > .fi-sidebar-group-items {
+    @apply ms-0;
+}
+
+.fi-sidebar-item-grouped-border {
+    @apply hidden;
+}
+
+.fi-sidebar-item-btn {
+    @apply justify-start gap-x-3 rounded-lg px-3 py-2.5;
+
+    & > .fi-icon {
+        @apply size-6 text-gray-500 dark:text-gray-400;
+    }
+}
+
+.fi-sidebar-item-label {
+    @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+}
+
+.fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn {
+    @apply hover:bg-gray-100 dark:hover:bg-white/5;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    @apply bg-primary-50 dark:bg-primary-500/12;
+
+    & > .fi-icon,
+    & > .fi-sidebar-item-label {
+        @apply text-primary-500 dark:text-primary-400;
+    }
+}
+
+.fi-sidebar-item-badge-ctn .fi-badge {
+    @apply rounded-full;
+}
+
+/* ------------------------------------------------------------------ brand */
+
+.ta-brand {
+    @apply flex items-center gap-2.5;
+}
+
+.ta-brand-mark {
+    @apply inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-500 text-white;
+}
+
+.ta-brand-text {
+    @apply text-xl leading-tight font-semibold text-gray-900 dark:text-white;
+}
+
+.ta-brand-sub {
+    @apply ms-1.5 text-xl font-normal text-gray-400;
+}
+
+/* ------------------------------------------------------------------ header */
+
+.fi-topbar {
+    @apply gap-x-3 border-b border-gray-200 bg-white px-4 shadow-none ring-0 md:px-6 dark:border-gray-800 dark:bg-gray-900;
+    min-height: var(--ta-header-h);
+}
+
+.fi-topbar-start {
+    @apply me-3;
+}
+
+.fi-topbar-collapse-sidebar-btn-ctn {
+    @apply w-11;
+}
+
+/* Square hamburger buttons (TailAdmin) */
+.fi-topbar-open-sidebar-btn,
+.fi-topbar-close-sidebar-btn,
+.fi-topbar-open-collapse-sidebar-btn,
+.fi-topbar-close-collapse-sidebar-btn {
+    @apply size-11! rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-white/5;
+}
+
+.fi-topbar-end {
+    @apply ms-0 flex-1 gap-x-3;
+}
+
+/* ⌘K search sits on the left of the header; everything after it is pushed right */
+.fi-topbar-end > .fi-global-search-ctn {
+    @apply me-auto w-full max-w-[26.875rem];
+}
+
+.fi-global-search {
+    @apply w-full;
+}
+
+.fi-global-search-field .fi-input-wrp {
+    @apply h-11 rounded-lg bg-transparent shadow-theme-xs ring-gray-200 dark:bg-white/[0.03] dark:ring-gray-800;
+}
+
+.fi-global-search-field .fi-input-wrp-suffix {
+    @apply me-2 my-auto h-7 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-xs text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400;
+}
+
+/* Round icon buttons: theme toggle + notifications */
+.ta-header-btn,
+.fi-topbar-database-notifications-btn {
+    @apply relative inline-flex size-11! shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white;
+
+    & .fi-icon {
+        @apply size-5;
+    }
+}
+
+.fi-topbar-database-notifications-btn .fi-icon-btn-badge-ctn {
+    @apply -top-0.5 end-0;
+}
+
+/* User: avatar + name + chevron */
+.ta-user-trigger {
+    @apply flex items-center gap-3 rounded-full text-gray-700 dark:text-gray-300;
+
+    & .fi-avatar {
+        @apply size-11;
+    }
+}
+
+.ta-user-trigger-name {
+    @apply hidden text-sm font-medium sm:block;
+}
+
+.ta-user-trigger-chevron {
+    @apply hidden size-4 text-gray-500 sm:block;
+}
+
+.fi-user-menu .fi-dropdown-panel,
+.fi-dropdown-panel {
+    @apply rounded-2xl shadow-lg ring-gray-200 dark:ring-gray-800;
+}
+
+/* ------------------------------------------------------------------ page */
+
+.fi-header-heading {
+    @apply text-xl font-semibold text-gray-800 sm:text-2xl dark:text-white/90;
+}
+
+.fi-breadcrumbs-item-label {
+    @apply text-sm text-gray-500;
+}
+
+/* Cards: sections, tables, widgets */
+.fi-section:not(.fi-section-not-contained),
+.fi-ta-ctn,
+.fi-wi-stats-overview-stat,
+.fi-wi-chart .fi-section,
+.ta-card {
+    @apply rounded-2xl border border-gray-200 bg-white shadow-none ring-0 dark:border-gray-800 dark:bg-white/[0.03];
+}
+
+.fi-section-header-heading {
+    @apply text-lg font-semibold text-gray-800 dark:text-white/90;
+}
+
+.fi-section-header-description {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+/* Metric cards */
+.fi-wi-stats-overview-stat {
+    @apply p-5 md:p-6;
+}
+
+.fi-wi-stats-overview-stat-label {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.fi-wi-stats-overview-stat-value {
+    @apply mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90;
+}
+
+.fi-wi-stats-overview-stat-label-ctn > .fi-icon {
+    @apply box-content size-6 rounded-xl bg-gray-100 p-3 text-gray-800 dark:bg-gray-800 dark:text-white/90;
+}
+
+/* Buttons & inputs */
+.fi-btn {
+    @apply rounded-lg shadow-theme-xs;
+}
+
+.fi-input-wrp {
+    @apply rounded-lg ring-gray-300 dark:ring-gray-700;
+
+    &:focus-within {
+        @apply shadow-focus-ring ring-primary-300 dark:ring-primary-800;
+    }
+}
+
+/* Badges — TailAdmin pills */
+.fi-badge {
+    @apply rounded-full px-2.5 py-0.5 text-theme-xs font-medium ring-0;
+}
+
+/* Segmented tabs (All / Solved / Pending) */
+.fi-tabs {
+    @apply rounded-lg bg-gray-100 p-0.5 shadow-none ring-0 dark:bg-gray-900;
+}
+
+.fi-tabs-item {
+    @apply rounded-md px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white;
+
+    &.fi-active {
+        @apply bg-white text-gray-900 shadow-theme-xs dark:bg-gray-800 dark:text-white;
+
+        & .fi-tabs-item-label {
+            @apply text-gray-900 dark:text-white;
+        }
+    }
+}
+
+/* ------------------------------------------------------------------ tables (Data Table 3) */
+
+.fi-ta-header {
+    @apply px-5 py-4 sm:px-6;
+}
+
+.fi-ta-header-heading {
+    @apply text-lg font-semibold text-gray-800 dark:text-white/90;
+}
+
+.fi-ta-header-description {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.fi-ta-header-toolbar {
+    @apply border-t border-gray-100 px-5 py-4 sm:px-6 dark:border-white/[0.05];
+}
+
+/* Tables without a heading: search, filters and "Download" share one toolbar row */
+/* (actions are the header's first child only when there is no heading; :has() can't be nested) */
+.fi-ta-header-ctn:has(> .fi-ta-header > .fi-ta-actions:first-child) {
+    @apply flex flex-col-reverse sm:flex-row-reverse sm:items-center;
+
+    & > .fi-ta-header {
+        @apply px-5 pt-0 pb-4 sm:py-4 sm:ps-0 sm:pe-6;
+    }
+
+    & > .fi-ta-header-toolbar {
+        @apply flex-1 border-t-0 sm:pe-3;
+    }
+}
+
+.fi-ta-search-field .fi-input-wrp {
+    @apply h-11 shadow-theme-xs xl:w-[18.75rem];
+}
+
+.fi-ta-table {
+    @apply divide-gray-100 dark:divide-white/[0.05];
+
+    & > thead {
+        @apply border-y border-gray-100 bg-transparent dark:border-white/[0.05];
+    }
+
+    & > thead > tr {
+        @apply bg-transparent;
+    }
+
+    & > tbody {
+        @apply divide-gray-100 dark:divide-white/[0.05];
+    }
+}
+
+.fi-ta-header-cell,
+.fi-ta-header-cell-sort-btn {
+    @apply text-theme-xs font-medium text-gray-500 dark:text-gray-400;
+}
+
+.fi-ta-header-cell {
+    @apply px-4 py-3 first-of-type:ps-5 sm:first-of-type:ps-6;
+}
+
+.fi-ta-row {
+    @apply transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.02];
+}
+
+.fi-ta-cell {
+    @apply text-theme-sm text-gray-500 dark:text-gray-400;
+
+    &:first-of-type {
+        @apply ps-2 sm:ps-3;
+    }
+}
+
+.fi-ta-text-item-label {
+    @apply text-theme-sm;
+}
+
+/* Pagination: "Showing x to y of z" + square page buttons */
+.fi-ta-ctn .fi-pagination {
+    @apply border-t border-gray-100 px-5 py-4 sm:px-6 dark:border-white/[0.05];
+}
+
+.fi-pagination-overview {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.fi-pagination-items {
+    @apply gap-x-1 rounded-none bg-transparent shadow-none ring-0 dark:bg-transparent;
+}
+
+.fi-pagination-item {
+    @apply border-0;
+}
+
+.fi-pagination-item-btn {
+    @apply flex size-10 items-center justify-center rounded-lg text-sm font-medium text-gray-700 hover:bg-primary-500/[0.08] hover:text-primary-500 dark:text-gray-400;
+}
+
+.fi-pagination-item.fi-active .fi-pagination-item-btn {
+    @apply bg-primary-500 text-white hover:bg-primary-500 hover:text-white;
+
+    & .fi-pagination-item-label {
+        @apply text-white;
+    }
+}
+
+.fi-pagination-previous-btn,
+.fi-pagination-next-btn {
+    @apply rounded-lg border border-gray-300 bg-white text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400;
+}
+
+/* Avatar + name + email cells (App\Filament\Support\Avatar) */
+.ta-person {
+    @apply flex items-center gap-3;
+}
+
+.ta-avatar {
+    @apply inline-flex shrink-0 items-center justify-center rounded-full font-medium;
+}
+
+.ta-person-name {
+    @apply block truncate text-theme-sm font-medium text-gray-800 dark:text-white/90;
+}
+
+.ta-person-meta {
+    @apply block truncate text-theme-xs text-gray-500 dark:text-gray-400;
+}
+
+.ta-icon-btn {
+    @apply inline-flex size-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-white/5;
+
+    & svg {
+        @apply size-4;
+    }
+}
+
+/* ------------------------------------------------------------------ auth pages */
+
+.fi-simple-layout {
+    @apply bg-gray-50 dark:bg-gray-950;
+}
+
+.fi-simple-main {
+    @apply rounded-2xl border border-gray-200 shadow-none ring-0 dark:border-gray-800 dark:bg-gray-900;
+}
+
+/* Custom scrollbar (TailAdmin) */
+.fi-sidebar-nav {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-gray-200) transparent;
+}
+
+.dark .fi-sidebar-nav {
+    scrollbar-color: var(--color-gray-700) transparent;
+}

@@ -1,0 +1,226 @@
+==============================================================================
+  FUNSKOOL ADMIN — REQUIRED RESOURCES & API CREDENTIALS
+==============================================================================
+
+  Every value below goes into the server's .env file (never into the database,
+  never into git, never into browser/app JavaScript). After editing .env on a
+  server that caches config, run:   php artisan config:cache
+
+  Check what is connected at any time:  Admin → Integrations → Integration Status
+
+  LEGEND
+    [!!! REQUIRED]   needed before taking real orders
+    [ RECOMMENDED ]  strongly advised for launch
+    [  OPTIONAL   ]  only if you use that service
+    (wired)          the code already uses it — just add the keys
+    (not wired)      listed for planning; needs development work first
+
+  ALWAYS start with the provider's TEST/SANDBOX keys, run a full order end to
+  end, then switch to LIVE keys.
+
+
+##############################################################################
+##                                                                          ##
+##   1. PAYMENT GATEWAY                                   [!!! REQUIRED]    ##
+##                                                                          ##
+##############################################################################
+
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ RAZORPAY  (primary — UPI, cards, netbanking, wallets in INR)   (wired) │
+  └────────────────────────────────────────────────────────────────────────┘
+  Get them : https://dashboard.razorpay.com → Account & Settings → API Keys
+             (KYC/business activation is needed before LIVE keys work)
+
+  >>> RAZORPAY_KEY_ID=            rzp_test_xxx  /  rzp_live_xxx
+  >>> RAZORPAY_KEY_SECRET=        secret shown once when the key is generated
+  >>> RAZORPAY_WEBHOOK_SECRET=    any strong random string you choose
+
+  Then, in the Razorpay dashboard → Settings → Webhooks → Add:
+      URL     : https://YOUR-DOMAIN/api/webhooks/payments/razorpay
+      Secret  : same value as RAZORPAY_WEBHOOK_SECRET
+      Events  : payment_link.paid, payment_link.expired, payment_link.cancelled
+  And in Admin → Configuration → Payment Methods → activate "Razorpay".
+
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ STRIPE  (optional second gateway — international cards)        (wired) │
+  └────────────────────────────────────────────────────────────────────────┘
+  [  OPTIONAL   ]
+  Get them : https://dashboard.stripe.com → Developers → API keys
+      STRIPE_KEY=                 pk_test_xxx / pk_live_xxx
+      STRIPE_SECRET=              sk_test_xxx / sk_live_xxx
+      STRIPE_WEBHOOK_SECRET=      whsec_xxx (shown when you create the webhook)
+  Webhook URL : https://YOUR-DOMAIN/api/webhooks/payments/stripe
+  Events      : checkout.session.completed, checkout.session.async_payment_succeeded,
+                checkout.session.async_payment_failed, checkout.session.expired
+
+  Alternatives (not wired — each needs a driver like app/Payments/Gateways/*):
+      Cashfree, PayU, PhonePe PG, Paytm PG, CCAvenue.
+
+  Cash on Delivery and Bank Transfer need NO credentials (staff use
+  "Record Payment" on the order).
+
+
+##############################################################################
+##                                                                          ##
+##   2. SHIPPING / COURIER                                [!!! REQUIRED]    ##
+##                                                                          ##
+##############################################################################
+
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ SHIPROCKET  (courier aggregator: AWB, labels, tracking)        (wired) │
+  └────────────────────────────────────────────────────────────────────────┘
+  Get them : https://app.shiprocket.in → Settings → API → Configure → Create
+             an API USER (a separate email/password, not your login).
+             Add a pickup address under Settings → Pickup Addresses.
+
+  >>> SHIPROCKET_EMAIL=           the API user's email
+  >>> SHIPROCKET_PASSWORD=        the API user's password
+  >>> SHIPROCKET_PICKUP_LOCATION= exact pickup-address nickname, e.g. Primary
+  >>> SHIPROCKET_WEBHOOK_TOKEN=   any strong random string you choose
+
+  Then Shiprocket → Settings → API → Webhooks:
+      URL   : https://YOUR-DOMAIN/api/webhooks/shipping/shiprocket
+      Token : same value as SHIPROCKET_WEBHOOK_TOKEN (sent as x-api-key)
+  Tracking is also polled hourly by the scheduler (php artisan shipments:sync).
+
+  Without Shiprocket you can still ship: Orders → Ship → "Manual" and type the
+  courier + tracking number. Also tell us product WEIGHTS (kg) on each product
+  — couriers price by weight.
+
+  Alternatives (not wired): Delhivery, Blue Dart, Ecom Express, Xpressbees,
+  India Post, Shipway, NimbusPost.
+
+
+##############################################################################
+##                                                                          ##
+##   3. EMAIL (order confirmations, shipping, password reset) [!!! REQUIRED]##
+##                                                                          ##
+##############################################################################
+                                                                     (wired)
+  Pick ONE provider. Emails go out through the queue worker (section 6).
+
+  >>> MAIL_MAILER=                smtp | ses | postmark | resend
+  >>> MAIL_FROM_ADDRESS=          orders@your-domain.com   (must be on YOUR domain)
+  >>> MAIL_FROM_NAME=             "Funskool"
+
+  If MAIL_MAILER=smtp (Gmail Workspace, Zoho, Brevo, Mailgun, SendGrid SMTP…):
+      MAIL_HOST=                  e.g. smtp-relay.brevo.com
+      MAIL_PORT=                  587
+      MAIL_USERNAME=
+      MAIL_PASSWORD=
+      MAIL_SCHEME=                (leave empty for STARTTLS on 587)
+  If MAIL_MAILER=ses   : AWS_ACCESS_KEY_ID=, AWS_SECRET_ACCESS_KEY=, AWS_DEFAULT_REGION=
+  If MAIL_MAILER=postmark : POSTMARK_API_KEY=
+  If MAIL_MAILER=resend   : RESEND_API_KEY=
+
+  DNS (ask whoever manages the domain): SPF, DKIM and DMARC records for the
+  sending domain — otherwise order emails land in spam.
+
+
+##############################################################################
+##                                                                          ##
+##   4. SMS (order / shipping updates)                    [ RECOMMENDED ]   ##
+##                                                                          ##
+##############################################################################
+                                                                     (wired)
+      SMS_DRIVER=                 log (default, dev only) | msg91 | twilio
+      SMS_DEFAULT_COUNTRY_CODE=   91
+
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ MSG91 (India)                                                          │
+  └────────────────────────────────────────────────────────────────────────┘
+  India requires DLT registration (TRAI): register your entity + sender ID +
+  every message template on a DLT portal (Jio/Airtel/Vi/BSNL), then add the
+  approved templates as MSG91 "Flow" templates.
+  Get them : https://control.msg91.com → Authkey / Flow
+  >>> MSG91_AUTH_KEY=
+  >>> MSG91_SENDER_ID=                    6-char DLT sender id, e.g. FNSKOL
+  >>> MSG91_TEMPLATE_ORDER_PLACED=        Flow template id (var1=name, var2=order no.)
+  >>> MSG91_TEMPLATE_ORDER_STATUS=        Flow template id (var1=name, var2=order no.)
+  >>> MSG91_TEMPLATE_ORDER_SHIPPED=       Flow template id (var1=order no., var2=AWB, var3=tracking URL)
+  >>> MSG91_TEMPLATE_PAYMENT_RECEIVED=    Flow template id (var1=name, var2=order no.)
+
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ TWILIO (international)                                                 │
+  └────────────────────────────────────────────────────────────────────────┘
+      TWILIO_SID=
+      TWILIO_AUTH_TOKEN=
+      TWILIO_FROM=                +1XXXXXXXXXX (a Twilio number / sender)
+
+  WhatsApp Business notifications (not wired): needs a Meta WhatsApp Business
+  account + approved templates via Gupshup / Interakt / AiSensy / Twilio.
+
+
+##############################################################################
+##                                                                          ##
+##   5. CONNECTING OTHER WEBSITES (WooCommerce, Shopify, Next.js, apps)     ##
+##                                                                          ##
+##############################################################################
+                                                                     (wired)
+  No .env values. Create them in:  Admin → Integrations → Connected Websites
+      → "Connect a website"  → copy the API KEY (shown once) and WEBHOOK SECRET
+  Give both to the developer of the other website; they must store them in
+  THAT site's server-side environment. API reference: docs/CHANNEL_API.md
+
+  Needed from each connected site's owner:
+      - their webhook receiver URL (https)
+      - which events they want (orders, shipments, products, stock)
+      - whether THEY collect payment, or customers should pay through our
+        Razorpay/Stripe (we return a payment_url)
+
+
+##############################################################################
+##                                                                          ##
+##   6. SERVER / INFRASTRUCTURE                           [!!! REQUIRED]    ##
+##                                                                          ##
+##############################################################################
+
+  >>> APP_ENV=production
+  >>> APP_DEBUG=false                      NEVER true in production
+  >>> APP_URL=https://YOUR-DOMAIN          (payment & webhook URLs are built from this)
+  >>> APP_KEY=                             php artisan key:generate (keep it secret, back it up —
+                                           it also encrypts stored webhook secrets & MFA codes)
+  >>> DB_CONNECTION / DB_HOST / DB_PORT / DB_DATABASE / DB_USERNAME / DB_PASSWORD
+  >>> QUEUE_CONNECTION=database            (or redis) — and run a worker:
+                                           php artisan queue:work --tries=3   (Supervisor/systemd)
+  >>> Cron entry:  * * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1
+      SESSION_SECURE_COOKIE=true           (HTTPS only cookies)
+      ADMIN_REQUIRE_MFA=true               force authenticator-app 2FA for all staff
+      FRONTEND_URL=                        only if a separate headless storefront handles password resets
+
+  Also needed (not .env):
+      - Domain + DNS access, SSL certificate (Let's Encrypt / Cloudflare)
+      - Hosting with PHP 8.3+, MySQL 8, and a process manager for the queue worker
+      - Automated database backups + a TESTED restore
+      - File storage for product images (local disk now; S3/R2 optional:
+        FILESYSTEM_DISK, AWS_BUCKET, AWS_URL …)
+
+
+##############################################################################
+##                                                                          ##
+##   7. OPTIONAL / LATER  (not wired — planning only)                       ##
+##                                                                          ##
+##############################################################################
+      Error tracking ........ Sentry / Flare / Bugsnag DSN
+      Uptime monitoring ..... UptimeRobot / Better Stack (monitor /up)
+      Analytics ............. Google Analytics 4 measurement id, Meta Pixel id (needs cookie consent)
+      Bot protection ........ Cloudflare Turnstile / Google reCAPTCHA site + secret keys
+      Search ................ Meilisearch / Algolia keys (Laravel Scout)
+      Tax engine ............ only if multi-state/international tax rules are needed
+      Accounting ............ Tally / Zoho Books / QuickBooks API
+      GST e-invoicing ....... IRP/GSP credentials (only if turnover requires e-invoicing)
+      Address validation .... Google Places / India Post pincode API
+
+
+==============================================================================
+  BUSINESS INFORMATION NEEDED (Admin → Configuration → Settings)
+==============================================================================
+  [ ] Legal business name, registered address, GSTIN, support email & phone
+  [ ] Tax rate(s) — confirm GST treatment with your CA before launch
+  [ ] Return window (days) and return policy, shipping policy, privacy policy,
+      terms — seeded as DRAFTS under Content → Pages & Policies; have them
+      reviewed and publish them
+  [ ] New-order and low-stock alert email addresses
+  [ ] Staff list with roles (owner, manager, catalogue, fulfilment, support,
+      marketing, finance, analyst) — remove the demo admin@funskool.test account
+  [ ] Final product data: prices, stock, weights, images you have rights to
